@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import connectDB from '@/lib/mongodb';
 import Contact from '@/models/Contact';
+import Message from '@/models/Message';
 
 export const runtime = 'nodejs';
 
@@ -64,6 +65,14 @@ export async function POST(request: Request) {
         <p><strong>Message:</strong></p>
         <p>${message.replace(/\n/g, '<br>')}</p>
       `,
+    });
+
+    await Message.create({
+      name,
+      email,
+      subject: subject || '',
+      message,
+      read: false,
     });
 
     return NextResponse.json({ success: true, message: 'Message sent successfully.' });

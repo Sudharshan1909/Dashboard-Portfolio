@@ -30,7 +30,7 @@ export default function Footer() {
           <span className="-translate-y-0.5">{displayName}</span>
         </Link>
         <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-100 sm:ml-4 sm:pl-4 sm:border-l sm:border-neutral-300 dark:sm:border-neutral-700 sm:mt-0">
-          {copyrightText} by <a href="https://github.com/tomcomtang" target="_blank" rel="noopener noreferrer" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-semibold">tomcomtang</a> <br />
+          {copyrightText} by <a href="https://github.com/sudharshan1909" target="_blank" rel="noopener noreferrer" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-semibold">sudharshan K</a> <br />
           Distributed by <a href="https://themewagon.com" target="_blank" rel="noopener noreferrer" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-semibold">ThemeWagon</a>
         </p>
         <span className="inline-flex justify-center mt-2 space-x-5 sm:ml-auto sm:mt-0 sm:justify-start">

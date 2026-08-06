@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { Trash2, X, Calendar, User } from 'lucide-react';
 import { useState, useEffect, useCallback, ChangeEvent, FormEvent, useRef } from 'react';
 import SignOutButton from '@/components/SignOutButton';
 
@@ -50,6 +51,18 @@ interface ContactData {
   githubUrl: string;
 }
 
+interface MessageData {
+  _id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  read: boolean;
+  sentAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 interface PostSection {
   id: string;
   title: string;
@@ -63,6 +76,7 @@ const sidebarItems = [
   { key: 'posts', title: 'Posts' },
   { key: 'about', title: 'About' },
   { key: 'contact', title: 'Contact' },
+  { key: 'messages', title: 'Messages' },
 ] as const;
 
 type SectionKey = (typeof sidebarItems)[number]['key'];
@@ -438,7 +452,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
               alt="Preview"
               width={200}
               height={120}
-              className="rounded-lg border border-neutral-200 dark:border-neutral-700"
+              className="rounded-lg border border-neutral-200 dark:border-neutral-700 border-l-4 border-l-orange-500"
             />
           </div>
         )}
@@ -692,6 +706,10 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
   const [contactLoading, setContactLoading] = useState(false);
   const [contactSaving, setContactSaving] = useState(false);
   const [contactMessage, setContactMessage] = useState<string | null>(null);
+  const [messages, setMessages] = useState<MessageData[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messagesError, setMessagesError] = useState<string | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<MessageData | null>(null);
   const postFileInputRef = useRef<HTMLInputElement>(null);
 
   const loadPosts = useCallback(async () => {
@@ -756,11 +774,64 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
     }
   }, [active, loadPosts]);
 
+  const loadMessages = useCallback(async () => {
+    setMessagesLoading(true);
+    setMessagesError(null);
+    try {
+      const res = await fetch('/api/messages');
+      if (res.ok) {
+        const data = (await res.json()) as MessageData[];
+        setMessages(data);
+      } else {
+        const err = (await res.json()) as { error?: string };
+        setMessagesError(err.error ?? 'Failed to load messages.');
+      }
+    } catch {
+      setMessagesError('Failed to load messages.');
+    } finally {
+      setMessagesLoading(false);
+    }
+  }, []);
+
+  const markMessageRead = async (id: string, read: boolean = true) => {
+    try {
+      const res = await fetch(`/api/messages/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read }),
+      });
+      if (res.ok) {
+        const updated = (await res.json()) as MessageData;
+        setMessages((prev) => prev.map((m) => (m._id === id ? updated : m)));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const deleteMessage = async (id: string) => {
+    try {
+      const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setMessages((prev) => prev.filter((m) => m._id !== id));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     if (active === 'contact') {
       loadContactContent();
     }
   }, [active, loadContactContent]);
+
+  useEffect(() => {
+    if (active === 'messages') {
+      loadMessages();
+      loadContactContent();
+    }
+  }, [active, loadMessages, loadContactContent]);
 
   useEffect(() => {
     if (active === 'posts') {
@@ -1236,7 +1307,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
               alt="Preview"
               width={200}
               height={120}
-              className="rounded-lg border border-neutral-200 dark:border-neutral-700"
+              className="rounded-lg border border-neutral-200 dark:border-neutral-700 border-l-4 border-l-orange-500"
             />
           </div>
         )}
@@ -1641,7 +1712,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
               </label>
               <div className="space-y-4">
                 {expInputs.map((exp, idx) => (
-                  <div key={exp.id} className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg space-y-3">
+                   <div key={exp.id} className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg border-l-4 border-l-orange-500 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
                         Experience {idx + 1}
@@ -1738,7 +1809,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
               </label>
               <div className="space-y-4">
                 {careerInputs.map((career, idx) => (
-                  <div key={career.id} className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg space-y-3">
+                   <div key={career.id} className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg border-l-4 border-l-orange-500 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
                         Career {idx + 1}
@@ -2006,6 +2077,168 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
     </form>
   );
 
+  const renderMessagesSection = () => {
+    const unreadCount = messages.filter((m) => !m.read).length;
+
+    if (selectedMessage) {
+      const contactEmail = contactData.email || 'N/A';
+
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">Message Detail</h2>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedMessage(null);
+              }}
+              className="p-1 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+              title="Back to messages"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl border-l-4 border-l-orange-500 bg-white dark:bg-neutral-900">
+            <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
+              <h3 className="text-lg font-black text-black dark:text-white mb-3">
+                {selectedMessage.name}
+              </h3>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                <span className="font-medium text-neutral-800 dark:text-neutral-200">From:</span>{" "}
+                {selectedMessage.email}
+              </p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                <span className="font-medium text-neutral-800 dark:text-neutral-200">To:</span>{" "}
+                {contactEmail}
+              </p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                <span className="font-medium text-neutral-800 dark:text-neutral-200">Subject:</span>{" "}
+                {selectedMessage.subject || '(no subject)'}
+              </p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                <span className="font-medium text-neutral-800 dark:text-neutral-200">Date:</span>{" "}
+                {new Date(selectedMessage.sentAt).toLocaleString()}
+              </p>
+            </div>
+
+            <div className="p-6 whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+              {selectedMessage.message}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedMessage(null);
+                markMessageRead(selectedMessage._id);
+              }}
+              className="flex items-center gap-1 px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+            >
+              <X className="h-4 w-4" />
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => deleteMessage(selectedMessage._id)}
+              className="flex items-center gap-1 px-3 py-1 text-sm text-red-500 hover:text-red-600"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">Messages</h2>
+          {unreadCount > 0 && (
+            <span className="px-2.5 py-0.5 text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 rounded-full">
+              {unreadCount} unread
+            </span>
+          )}
+        </div>
+
+        {messagesError && (
+          <p className="text-sm text-red-600">{messagesError}</p>
+        )}
+
+        {messagesLoading ? (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading messages...</p>
+        ) : messages.length === 0 ? (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">No messages yet.</p>
+        ) : (
+          <div className="divide-y divide-neutral-200 dark:divide-neutral-700 rounded-xl overflow-hidden">
+            {messages.map((msg) => (
+              <div
+                key={msg._id}
+                onClick={() => {
+                  setSelectedMessage(msg);
+                  if (!msg.read) {
+                    markMessageRead(msg._id);
+                  }
+                }}
+                className={`relative p-4 cursor-pointer ${
+                  msg.read
+                    ? 'bg-neutral-800 dark:bg-neutral-800 hover:bg-neutral-700 dark:hover:bg-neutral-700'
+                    : 'bg-black dark:bg-neutral-800 hover:bg-neutral-900 dark:hover:bg-neutral-700'
+                }`}
+              >
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-r"></div>
+                <div className="flex items-start justify-between gap-3 pl-2">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center">
+                      <User className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium ${msg.read ? 'text-neutral-400 dark:text-neutral-400' : 'font-black text-white dark:text-white'}`}>
+                          {msg.name}
+                        </span>
+                        <span className="text-xs text-neutral-500 dark:text-neutral-500 truncate">
+                          ({msg.email})
+                        </span>
+                      </div>
+                      {msg.subject && (
+                        <p className={`text-sm ${msg.read ? 'text-neutral-400 dark:text-neutral-400' : 'font-medium text-neutral-200 dark:text-white'} mt-1 truncate`}>
+                          {msg.subject}
+                        </p>
+                      )}
+                      <p className={`text-xs ${msg.read ? 'text-neutral-500 dark:text-neutral-600' : 'text-neutral-400 dark:text-neutral-400'} mt-1 line-clamp-2`}>
+                        {msg.message}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <span className="text-xs text-neutral-400 dark:text-neutral-600">
+                      {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteMessage(msg._id);
+                      }}
+                      className="p-1 text-neutral-500 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400"
+                      title="Delete message"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderPlaceholder = () => (
     <>
       <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">{activeItem.title}</h2>
@@ -2021,6 +2254,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
     if (active === 'posts') return renderPostsSection();
     if (active === 'about') return renderAboutSection();
     if (active === 'contact') return renderContactSection();
+    if (active === 'messages') return renderMessagesSection();
     return renderPlaceholder();
   };
 
