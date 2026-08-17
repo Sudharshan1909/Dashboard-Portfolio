@@ -6,8 +6,6 @@ import { isAuthorizedEmail } from '@/auth.config';
 import WorkspaceShell from './WorkspaceShell';
 
 export default async function DashboardHomePage() {
-  // Sessions expire quickly (5s), so the dashboard always requires a fresh login.
-  // No persistent session across visits.
   const session = await auth();
 
   if (!session?.user || !isAuthorizedEmail(session.user.email)) {

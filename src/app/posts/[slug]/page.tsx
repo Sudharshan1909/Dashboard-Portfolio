@@ -5,8 +5,6 @@ import { notFound } from 'next/navigation';
 import connectDB from '@/lib/mongodb';
 import PostModel, { IPost } from '@/models/Post';
 
-export const dynamicParams = true;
-
 async function getPost(slug: string) {
   const staticPost = postsConfig.posts.find((p) => p.slug === `posts/${slug}`);
   if (staticPost) {

@@ -94,7 +94,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!email) return false;
 
       // Applies to both providers, so an unauthorized account never receives a
-      // session at all. That leaves the proxy's matching check as
+      // session at all. That leaves the middleware's matching check as
       // defence-in-depth against a stale JWT rather than the only gate.
       if (!AUTHORIZED_EMAIL) {
         console.error('[auth][signIn] AUTHORIZED_GOOGLE_EMAIL is not configured.');

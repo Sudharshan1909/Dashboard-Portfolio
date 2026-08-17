@@ -6,14 +6,14 @@ export const AUTHORIZED_EMAIL = process.env.AUTHORIZED_GOOGLE_EMAIL?.toLowerCase
 /**
  * Edge-safe half of the auth config.
  *
- * proxy.ts runs on the Edge runtime, where Mongoose cannot load — so this
+ * middleware.ts runs on the Edge runtime, where Mongoose cannot load — so this
  * file must never import the database. The Credentials provider (which does hit
  * the DB) is added in auth.ts, which only runs in Node.
  */
 
 /**
  * The dashboard is a single-account admin surface. This is the one place that
- * decides who gets in; auth.ts, the proxy and the dashboard pages all defer to
+ * decides who gets in; auth.ts, the middleware and the dashboard pages all defer to
  * it, because when they each spelled the rule out themselves they drifted apart
  * and produced a redirect loop.
  *

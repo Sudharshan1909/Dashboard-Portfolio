@@ -1,7 +1,5 @@
 import { postsConfig } from "@/config/posts";
 
-export const dynamicParams = true;
-
 export async function generateStaticParams() {
   return postsConfig.posts.map((post) => ({
     slug: post.slug.replace('posts/', ''),

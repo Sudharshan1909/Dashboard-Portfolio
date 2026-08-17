@@ -8,10 +8,6 @@ import { isAuthorizedEmail } from '@/auth.config';
 export default async function DashboardPage() {
   const session = await auth();
 
-  // Only forward the account that is actually allowed through. Forwarding on a
-  // session alone sends an unauthorized visitor to /dashboard/home, which sends
-  // them right back here — the loop this page used to be one half of. Everyone
-  // else falls through to the panel, which reads ?error= and says why.
   if (isAuthorizedEmail(session?.user?.email)) {
     redirect('/dashboard/home');
   }
@@ -29,7 +25,6 @@ export default async function DashboardPage() {
         <section className="flex flex-1 items-center justify-center px-6 py-24">
           <div className="w-full max-w-5xl rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-xl shadow-neutral-200/40 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/80 dark:shadow-neutral-950/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-              {/* Left: Portfolio description side */}
               <aside className="rounded-2xl p-6 bg-neutral-50/60 dark:bg-neutral-900/60">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-500">Get in touch</p>
                 <h3 className="mt-4 text-3xl font-extrabold text-neutral-900 dark:text-white">About this portfolio</h3>
@@ -56,7 +51,6 @@ export default async function DashboardPage() {
                 </div>
               </aside>
 
-              {/* Right: Dashboard auth toggle panel */}
               <DashboardAuthPanel redirectTo="/dashboard/home" />
             </div>
           </div>

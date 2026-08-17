@@ -19,13 +19,13 @@ const { auth } = NextAuth(authConfig);
 // has already made the decision by the time it runs.
 const authProxy = auth((_request: NextAuthRequest, _event: NextFetchEvent) => undefined);
 
-export function proxy(request: NextRequest, event: NextFetchEvent) {
+export function middleware(request: NextRequest, event: NextFetchEvent) {
   return authProxy(request, event);
 }
 
 export const config = {
   // Only the routes whose access depends on a session. Everything else skips
-  // the proxy entirely, including /api/auth/* — which must never be
+  // the middleware entirely, including /api/auth/* — which must never be
   // intercepted, or the sign-in callbacks break.
   matcher: ['/dashboard/:path*', '/auth'],
 };

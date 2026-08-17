@@ -2084,7 +2084,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
       const contactEmail = contactData.email || 'N/A';
 
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">Message Detail</h2>
             <button
@@ -2092,53 +2092,42 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
               onClick={() => {
                 setSelectedMessage(null);
               }}
-              className="p-1 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+              className="p-1 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white flex-shrink-0"
               title="Back to messages"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl border-l-4 border-l-orange-500 bg-white dark:bg-neutral-900">
+          <div className="border border-neutral-200 dark:border-neutral-700 rounded-xl border-l-4 border-l-orange-500 bg-white dark:bg-neutral-900 overflow-hidden min-w-0 flex flex-col">
             <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
               <h3 className="text-lg font-black text-black dark:text-white mb-3">
                 {selectedMessage.name}
               </h3>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 break-words">
                 <span className="font-medium text-neutral-800 dark:text-neutral-200">From:</span>{" "}
                 {selectedMessage.email}
               </p>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 break-words">
                 <span className="font-medium text-neutral-800 dark:text-neutral-200">To:</span>{" "}
                 {contactEmail}
               </p>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 break-words">
                 <span className="font-medium text-neutral-800 dark:text-neutral-200">Subject:</span>{" "}
                 {selectedMessage.subject || '(no subject)'}
               </p>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 break-words">
                 <span className="font-medium text-neutral-800 dark:text-neutral-200">Date:</span>{" "}
                 {new Date(selectedMessage.sentAt).toLocaleString()}
               </p>
             </div>
 
-            <div className="p-6 whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+            <div className="p-6 whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300 break-words overflow-y-auto max-h-[300px]">
               {selectedMessage.message}
             </div>
           </div>
 
           <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedMessage(null);
-                markMessageRead(selectedMessage._id);
-              }}
-              className="flex items-center gap-1 px-3 py-1 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-            >
-              <X className="h-4 w-4" />
-              Back
-            </button>
             <button
               type="button"
               onClick={() => deleteMessage(selectedMessage._id)}
@@ -2172,7 +2161,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
         ) : messages.length === 0 ? (
           <p className="text-sm text-neutral-500 dark:text-neutral-400">No messages yet.</p>
         ) : (
-          <div className="divide-y divide-neutral-200 dark:divide-neutral-700 rounded-xl overflow-hidden">
+          <div className="divide-y divide-neutral-200 dark:divide-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl border-l-4 border-l-orange-500 overflow-y-auto w-full max-h-[520px]">
             {messages.map((msg) => (
               <div
                 key={msg._id}
@@ -2182,21 +2171,20 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
                     markMessageRead(msg._id);
                   }
                 }}
-                className={`relative p-4 cursor-pointer ${
+                className={`p-4 cursor-pointer transition-all border-l-4 border-l-neutral-700 ${
                   msg.read
-                    ? 'bg-neutral-800 dark:bg-neutral-800 hover:bg-neutral-700 dark:hover:bg-neutral-700'
-                    : 'bg-black dark:bg-neutral-800 hover:bg-neutral-900 dark:hover:bg-neutral-700'
-                }`}
+                    ? 'bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                    : 'bg-black dark:bg-neutral-900 shadow-md dark:shadow-neutral-900/50 hover:bg-neutral-900 dark:hover:bg-neutral-800'
+                }}`}
               >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-r"></div>
-                <div className="flex items-start justify-between gap-3 pl-2">
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0 flex-1">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center">
                       <User className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-medium ${msg.read ? 'text-neutral-400 dark:text-neutral-400' : 'font-black text-white dark:text-white'}`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`text-sm font-medium truncate ${msg.read ? 'text-neutral-600 dark:text-neutral-400' : 'font-black text-black dark:text-white'}`}>
                           {msg.name}
                         </span>
                         <span className="text-xs text-neutral-500 dark:text-neutral-500 truncate">
@@ -2204,11 +2192,11 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
                         </span>
                       </div>
                       {msg.subject && (
-                        <p className={`text-sm ${msg.read ? 'text-neutral-400 dark:text-neutral-400' : 'font-medium text-neutral-200 dark:text-white'} mt-1 truncate`}>
+                        <p className={`text-sm truncate ${msg.read ? 'text-neutral-500 dark:text-neutral-500' : 'font-medium text-black dark:text-white'} mt-1`}>
                           {msg.subject}
                         </p>
                       )}
-                      <p className={`text-xs ${msg.read ? 'text-neutral-500 dark:text-neutral-600' : 'text-neutral-400 dark:text-neutral-400'} mt-1 line-clamp-2`}>
+                      <p className={`text-xs break-words ${msg.read ? 'text-neutral-400 dark:text-neutral-600' : 'text-neutral-300 dark:text-neutral-400'} mt-1 line-clamp-2`}>
                         {msg.message}
                       </p>
                     </div>
@@ -2292,7 +2280,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
       <div className="flex flex-col gap-6 md:flex-row">
         <aside className="w-full shrink-0 rounded-2xl bg-neutral-50/60 p-4 dark:bg-neutral-900/60 md:w-60">
           <p className="px-3 pb-3 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-neutral-400">
-            Menu
+            DashBoard
           </p>
 
           <nav className="flex flex-row gap-1 overflow-x-auto md:flex-col md:overflow-visible">
@@ -2313,7 +2301,7 @@ export default function WorkspaceShell({ user }: { user: WorkspaceUser }) {
           </nav>
         </aside>
 
-        <section className="min-h-[360px] flex-1 rounded-2xl border border-dashed border-neutral-300 p-6 dark:border-neutral-700">
+        <section className="min-h-[360px] flex-1 min-w-0 rounded-2xl border border-dashed border-neutral-300 p-6 dark:border-neutral-700">
           {renderSection()}
         </section>
       </div>

@@ -10,7 +10,7 @@ interface DashboardAuthPanelProps {
 
 /**
  * Two families of code arrive here. `unauthorized_google` / `auth_configuration`
- * come from proxy.ts and the dashboard page guards; the rest are Auth.js's own,
+ * come from middleware.ts and the dashboard page guards; the rest are Auth.js's own,
  * sent here because authConfig points pages.error at /dashboard.
  */
 const errorMessages: Record<string, string> = {
