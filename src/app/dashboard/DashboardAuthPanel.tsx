@@ -52,7 +52,7 @@ export default function DashboardAuthPanel({ redirectTo }: DashboardAuthPanelPro
           </div>
 
           <div className="inline-flex rounded-full border border-neutral-200 bg-white/80 p-1 dark:border-neutral-700 dark:bg-neutral-900/60">
-            <button
+            {/* <button
               type="button"
               onClick={() => setMode('login')}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
@@ -62,8 +62,8 @@ export default function DashboardAuthPanel({ redirectTo }: DashboardAuthPanelPro
               }`}
             >
               Login
-            </button>
-            <button
+            </button> */}
+            {/* <button
               type="button"
               onClick={() => setMode('register')}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
@@ -73,7 +73,7 @@ export default function DashboardAuthPanel({ redirectTo }: DashboardAuthPanelPro
               }`}
             >
               Register
-            </button>
+            </button> */}
           </div>
         </div>
 
